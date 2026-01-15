@@ -73,57 +73,59 @@
                 loadData();
             }, []);
 
-            const loadData = async () => {
+            const loadData = () => {
                 try {
-                    const logsResult = await window.storage.get('nicotine-logs');
-                    const goalResult = await window.storage.get('daily-goal');
-                    
-                    if (logsResult?.value) {
-                        setLogs(JSON.parse(logsResult.value));
+                    // Load logs from localStorage
+                    const savedLogs = localStorage.getItem('nicotine-logs');
+                    if (savedLogs) {
+                        setLogs(JSON.parse(savedLogs));
                     }
-                    if (goalResult?.value) {
-                        setDailyGoal(parseInt(goalResult.value));
+                    
+                    // Load daily goal from localStorage
+                    const savedGoal = localStorage.getItem('daily-goal');
+                    if (savedGoal) {
+                        setDailyGoal(parseInt(savedGoal));
                     }
                 } catch (error) {
-                    console.log('No existing data found');
+                    console.error('Failed to load data:', error);
                 }
             };
 
-            const saveData = async (newLogs) => {
+            const saveData = (newLogs) => {
                 try {
-                    await window.storage.set('nicotine-logs', JSON.stringify(newLogs));
+                    localStorage.setItem('nicotine-logs', JSON.stringify(newLogs));
                 } catch (error) {
                     console.error('Failed to save:', error);
                 }
             };
 
-            const logLozenge = async () => {
+            const logLozenge = () => {
                 const newLog = {
                     id: Date.now(),
                     timestamp: new Date().toISOString()
                 };
                 const newLogs = [newLog, ...logs];
                 setLogs(newLogs);
-                await saveData(newLogs);
+                saveData(newLogs);
                 
                 setJustLogged(true);
                 setTimeout(() => setJustLogged(false), 2000);
             };
 
-            const updateGoal = async (goal) => {
+            const updateGoal = (goal) => {
                 setDailyGoal(goal);
                 try {
-                    await window.storage.set('daily-goal', goal.toString());
+                    localStorage.setItem('daily-goal', goal.toString());
                 } catch (error) {
                     console.error('Failed to save goal:', error);
                 }
                 setShowGoalInput(false);
             };
 
-            const deleteLog = async (id) => {
+            const deleteLog = (id) => {
                 const newLogs = logs.filter(log => log.id !== id);
                 setLogs(newLogs);
-                await saveData(newLogs);
+                saveData(newLogs);
             };
 
             const getToday = () => {
